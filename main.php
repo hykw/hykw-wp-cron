@@ -15,37 +15,49 @@ define('HYKWCRON_HOOK_HOURLY', 'HYKWCRON_HOOK_HOURLY');
 define('HYKWCRON_HOOK_TWICEDAILY', 'HYKWCRON_HOOK_TWICEDAILY');
 define('HYKWCRON_HOOK_DAILY', 'HYKWCRON_HOOK_DAILY');
 
+define('HYKWCRON_HOOK_1SEC', 'HYKWCRON_HOOK_1SEC'); // for DEBUG
+define('HYKWCRON_INT_1SEC', '1sec');
+
+
 # http://codex.wordpress.org/Function_Reference/wp_schedule_event
 
 # wp-cron start
 function hykwcron_cronStart()
 {
-  wp_schedule_event(time(), 'hourly', 'HYKWCRON_HOOK_HOURLY');
-  wp_schedule_event(time(), 'twicedaily', 'HYKWCRON_HOOK_TWICEDAILY');
-  wp_schedule_event(time(), 'daily', 'HYKWCRON_HOOK_DAILY');
+  if (!wp_next_scheduled(HYKWCRON_HOOK_HOURLY))
+    wp_schedule_event(time(), 'hourly', HYKWCRON_HOOK_HOURLY);
+
+  if (!wp_next_scheduled(HYKWCRON_HOOK_TWICEDAILY))
+    wp_schedule_event(time(), 'twicedaily', HYKWCRON_HOOK_TWICEDAILY);
+
+  if (!wp_next_scheduled(HYKWCRON_HOOK_DAILY))
+    wp_schedule_event(time(), 'daily', HYKWCRON_HOOK_DAILY);
+
+
+  if (!wp_next_scheduled(HYKWCRON_HOOK_1SEC))
+    wp_schedule_event(time(), HYKWCRON_INT_1SEC, HYKWCRON_HOOK_1SEC);
 }
 register_activation_hook(__FILE__, 'hykwcron_cronStart');
 
 # wp-cron stop
 function hykwcron_cronStop()
 {
-  wp_clear_scheduled_hook('HYKWCRON_HOOK_HOURLY');
-  wp_clear_scheduled_hook('HYKWCRON_HOOK_TWICEDAILY');
-  wp_clear_scheduled_hook('HYKWCRON_HOOK_DAILY');
+  wp_clear_scheduled_hook(HYKWCRON_HOOK_HOURLY);
+  wp_clear_scheduled_hook(HYKWCRON_HOOK_TWICEDAILY);
+  wp_clear_scheduled_hook(HYKWCRON_HOOK_DAILY);
+
+  wp_clear_scheduled_hook(HYKWCRON_HOOK_1SEC);
 }
 register_deactivation_hook(__FILE__, 'hykwcron_cronStop');
 
 
-# Do action
-function hykwcron_do_hourly() {
-  do_action(HYKWCRON_HOOK_HOURLY);
+function hykwcron_add_interval($schedules)
+{
+  $schedules[HYKWCRON_INT_1SEC] = array(
+      'interval' => 1,
+      'display' => __('every 1 seconds'),
+  );
+  return $schedules;
 }
-function hykwcron_do_twicedaily() {
-  do_action(HYKWCRON_HOOK_TWICEDAILY);
-}
-function hykwcron_do_daily() {
-  do_action(HYKWCRON_HOOK_DAILY);
-}
-add_action('HYKWCRON_HOOK_HOURLY','hykwcron_do_hourly');
-add_action('HYKWCRON_HOOK_TWICEDAILY','hykwcron_do_twicedaily');
-add_action('HYKWCRON_HOOK_DAILY','hykwcron_do_daily');
+add_filter('cron_schedules', 'hykwcron_add_interval');
+

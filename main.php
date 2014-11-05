@@ -52,7 +52,7 @@ function hykwcron_cronStop()
   wp_clear_scheduled_hook(HYKWCRON_HOOK_TWICEDAILY);
   wp_clear_scheduled_hook(HYKWCRON_HOOK_DAILY);
 
-  wp_clear_scheduled_hook(HYKWCRON_HOOK_1SEC);
+  wp_clear_scheduled_hook(HYKWCRON_HOOK_5SEC);
 }
 register_deactivation_hook(__FILE__, 'hykwcron_cronStop');
 

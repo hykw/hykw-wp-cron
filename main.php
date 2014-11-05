@@ -15,8 +15,11 @@ define('HYKWCRON_HOOK_HOURLY', 'HYKWCRON_HOOK_HOURLY');
 define('HYKWCRON_HOOK_TWICEDAILY', 'HYKWCRON_HOOK_TWICEDAILY');
 define('HYKWCRON_HOOK_DAILY', 'HYKWCRON_HOOK_DAILY');
 
-define('HYKWCRON_HOOK_1SEC', 'HYKWCRON_HOOK_1SEC'); // for DEBUG
-define('HYKWCRON_INT_1SEC', '1sec');
+define('HYKWCRON_HOOK_5SEC', 'HYKWCRON_HOOK_5SEC'); // for DEBUG
+define('HYKWCRON_INT_5SEC', '5sec');
+
+# TRUE = DEBUG on
+define('HYKWCRON_IS_DEBUG', TRUE);
 
 
 # http://codex.wordpress.org/Function_Reference/wp_schedule_event
@@ -34,8 +37,11 @@ function hykwcron_cronStart()
     wp_schedule_event(time(), 'daily', HYKWCRON_HOOK_DAILY);
 
 
-  if (!wp_next_scheduled(HYKWCRON_HOOK_1SEC))
-    wp_schedule_event(time(), HYKWCRON_INT_1SEC, HYKWCRON_HOOK_1SEC);
+  ### DEBUG
+  if (HYKWCRON_IS_DEBUG) {
+    if (!wp_next_scheduled(HYKWCRON_HOOK_5SEC))
+      wp_schedule_event(time(), HYKWCRON_INT_5SEC, HYKWCRON_HOOK_5SEC);
+  }
 }
 register_activation_hook(__FILE__, 'hykwcron_cronStart');
 
@@ -53,11 +59,10 @@ register_deactivation_hook(__FILE__, 'hykwcron_cronStop');
 
 function hykwcron_add_interval($schedules)
 {
-  $schedules[HYKWCRON_INT_1SEC] = array(
-      'interval' => 1,
-      'display' => __('every 1 seconds'),
+  $schedules[HYKWCRON_INT_5SEC] = array(
+      'interval' => 5,
+      'display' => __('every 5 seconds'),
   );
   return $schedules;
 }
 add_filter('cron_schedules', 'hykwcron_add_interval');
-
